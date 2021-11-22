@@ -1,8 +1,12 @@
 from typing import List
 from os import path
+from lxml import html
+
+import requests
 import pandas as pd
 import numpy as np
 import datatable as dt
+
 
 def reduce_memory_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     """
@@ -56,6 +60,7 @@ def reduce_memory_usage(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
         )
     return df
 
+
 def get_dataframe(filepath: str, columns: List[str] = [], header: bool = True) -> pd.DataFrame:
     """
     Get data to a dataframe.
@@ -83,3 +88,33 @@ def get_dataframe(filepath: str, columns: List[str] = [], header: bool = True) -
     if len(columns):
         df.columns = columns
     return df
+
+
+def parse_web_page(url: str) -> html.HtmlElement:
+    """
+    Parse the web page.
+
+    This function is to get and parse the web page.
+
+    Parameters:
+    - url: str: The url of the web page to parse.
+
+    Returns:
+    - A html.HtmlElement object parsed.
+    """
+    try:
+        response: requests = requests.get(url)
+
+        ## Evalaute the object
+        response.raise_for_status()
+
+    except requests.exceptions.RequestException as err:
+
+        ## In case of error print the error
+        print(str(err))
+    else:
+        ## Transform to text the web page
+        web_page: str = response.content.decode('utf-8')
+
+        ## Parsing the web page
+        return html.fromstring(web_page)
